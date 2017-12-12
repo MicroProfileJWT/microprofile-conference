@@ -96,6 +96,7 @@ public class SessionResource {
         JsonWebToken jwt = (JsonWebToken) securityContext.getUserPrincipal();
         if (jwt == null) {
             // User was not authenticated
+            System.out.printf("allSessions, no token\n");
             return Collections.emptyList();
         }
         String userName = jwt.getName();

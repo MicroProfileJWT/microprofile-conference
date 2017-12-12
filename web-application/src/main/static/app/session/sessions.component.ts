@@ -71,6 +71,12 @@ export class SessionsComponent implements OnInit, OnChanges {
         this.router.navigateByUrl("/login");
     }
 
+    refresh() {
+        console.log("refreshing sessions...");
+        this.sessions = null;
+        getSessions();
+    }
+
     private static handleError(error: any): Promise<any> {
         console.error('An error occurred', error); // TODO - Display safe error
         return Promise.reject(error.message || error);

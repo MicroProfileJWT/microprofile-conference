@@ -25,6 +25,7 @@
         </div>
         <div *ngIf="undefined == speaker && auth.loggedIn()" class="col-xs">
             <button (click)="logout()" class="btn btn-primary">Logout</button>
+            <button (click)="refresh()" class="btn btn-primary">Refresh!!!</button>
             <button (click)="showJwtDialog = !showJwtDialog" class="btn btn-primary">Show JWT</button>
             <app-dialog [(visible)]="showJwtDialog">
                 <h1>JWT Claims</h1>
