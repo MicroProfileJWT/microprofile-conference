@@ -175,7 +175,7 @@
         </dependency>
         <dependency>
             <groupId>org.wildfly.swarm</groupId>
-            <artifactId>monitor</artifactId>
+            <artifactId>microprofile-health</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wildfly.swarm</groupId>
