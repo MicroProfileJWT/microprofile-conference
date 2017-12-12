@@ -110,7 +110,7 @@
         <version.payara>4.1.1.163</version.payara>
         <version.tomee>7.0.1</version.tomee>
         <version.wildfly>11.0.0.Final</version.wildfly>
-        <version.liberty>2017.10.+</version.liberty>
+        <version.liberty>2017.11.+</version.liberty>
 
         <!-- Dependencies -->
         <version.microprofile>1.2</version.microprofile>
