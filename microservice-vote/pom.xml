@@ -348,7 +348,7 @@
           				<configuration>
              		  	  	<features>
                		    		<acceptLicense>true</acceptLicense>
-                  	 			<feature>mpConfig-1.0</feature>
+                  	 			<feature>mpConfig-1.1</feature>
               		 		</features>
      						<installDirectory>${project.build.directory}/wlp</installDirectory>
       						<serverName>${wlpServerName}</serverName>
