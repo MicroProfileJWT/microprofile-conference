@@ -7,6 +7,7 @@ The application consists of several Microservices and a Web-Application managing
 * `microservice-schedule` : Schedule of the conference
 * `microservice-session` : Sessions of the conference
 * `microservice-speaker` : Speakers of the conference
+* `microservice-authz` : JWT token generation service
 * `microservice-vote` : Votes for each session
 * `web-application` : Frontend Angular2 | Bootstrap4
 
