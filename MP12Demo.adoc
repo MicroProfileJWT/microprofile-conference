@@ -1,0 +1,113 @@
+= MicroProfile 1.2 Conference App Demo
+
+
+== Prerequisites
+. Install the https://docs.openshift.org/latest/minishift/getting-started/installing.html[Minishift binary]
+. Install https://www.virtualbox.org/wiki/Downloads[VirtualBox]
+. Start minishift using the config-minishift.sh script
+. Configure your environment:
+[source,bash]
+----
+[starksm64-microprofile-conference 524]$ eval $(minishift oc-env)
+[starksm64-microprofile-conference 525]$ type oc
+oc is /Users/starksm/.minishift/cache/oc/v3.7.1/darwin/oc
+[starksm64-microprofile-conference 526]$ eval $(minishift docker-env)
+[starksm64-microprofile-conference 1568]$ oc login $(minishift ip):8443 -u admin -p admin
+Login successful.
+
+You have access to the following projects and can switch between them with 'oc project <projectname>':
+
+    default
+    kube-public
+    kube-system
+  * myproject
+    openshift
+    openshift-infra
+    openshift-node
+
+Using project "myproject".
+----
+[start=5]
+. open the minishift console uisng `minishift console`
+
+== Build and Deploy the Microservices
+
+. Build the services:
+[source,bash]
+----
+[starksm64-microprofile-conference 1559]$ mvn clean install -DskipTests=true
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] Conference
+[INFO] Conference :: Bootstrap Data
+[INFO] Conference :: Authorization
+[INFO] Conference :: Session
+[INFO] Conference :: Vote
+[INFO] Conference :: Speaker
+[INFO] Conference :: Schedule
+[INFO] Conference :: Web
+[INFO] Conference :: Start
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO]
+[INFO] Conference ......................................... SUCCESS [  0.693 s]
+[INFO] Conference :: Bootstrap Data ....................... SUCCESS [  2.593 s]
+[INFO] Conference :: Authorization ........................ SUCCESS [ 12.907 s]
+[INFO] Conference :: Session .............................. SUCCESS [  8.802 s]
+[INFO] Conference :: Vote ................................. SUCCESS [ 12.265 s]
+[INFO] Conference :: Speaker .............................. SUCCESS [  9.020 s]
+[INFO] Conference :: Schedule ............................. SUCCESS [ 15.670 s]
+[INFO] Conference :: Web .................................. SUCCESS [ 33.957 s]
+[INFO] Conference :: Start ................................ SUCCESS [  0.032 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 01:36 min
+[INFO] Finished at: 2018-02-16T00:00:40-08:00
+[INFO] Final Memory: 112M/1154M
+[INFO] ------------------------------------------------------------------------
+----
+[start=2]
+. Install the services into the minishift environment using the cloud-deploy.sh script:
+[source,bash]
+----
+[starksm64-microprofile-conference 1571]$ ./cloud-deploy.sh
+[INFO] Scanning for projects...
+[INFO]
+...
+deployment "microservice-vote" created
+service "microservice-vote" created
+route "microservice-vote" exposed
+[starksm64-microprofile-conference 1572]$ oc status
+In project My Project (myproject) on server https://192.168.99.100:8443
+
+http://microservice-authz-myproject.192.168.99.100.nip.io to pod port http (svc/microservice-authz)
+  pod/microservice-authz-3124937629-wl8g7 runs example/microservice-authz:latest
+
+http://microservice-schedule-myproject.192.168.99.100.nip.io to pod port http (svc/microservice-schedule)
+  pod/microservice-schedule-3040366544-n82zt runs example/microservice-schedule:latest
+
+http://microservice-session-myproject.192.168.99.100.nip.io to pod port http (svc/microservice-session)
+  pod/microservice-session-1164112827-r8z9r runs example/microservice-session:latest
+
+http://microservice-speaker-myproject.192.168.99.100.nip.io to pod port http (svc/microservice-speaker)
+  pod/microservice-speaker-2311407995-4mt9p runs example/microservice-speaker:latest
+
+http://microservice-vote-myproject.192.168.99.100.nip.io to pod port http (svc/microservice-vote)
+  pod/microservice-vote-2774736211-wzzhz runs example/microservice-vote:latest
+
+View details with 'oc describe <resource>/<name>' or list everything with 'oc get all'.
+[starksm64-microprofile-conference 1573]$
+----
+[start=3]
+. Run the web application front end
+[source,bash]
+----
+mvn package tomee:run -pl :web-application -DskipTests
+----
+[start=4]
+. Open the web application http://localhost:8080/
+
