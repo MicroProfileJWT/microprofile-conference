@@ -14,7 +14,10 @@
 
 package io.microprofile.showcase.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +40,6 @@ public class SessionStore {
 
     @Inject
     BootstrapData bootstrapData;
-
     private final ConcurrentHashMap<String, Session> storage = new ConcurrentHashMap<>();
 
     public Session save(final Session session) {
@@ -56,7 +58,9 @@ public class SessionStore {
     }
 
     public Collection<Session> getSessions() {
-        return storage.values();
+        ArrayList<Session> sessions = new ArrayList<>(storage.values());
+        sessions.sort(Comparator.comparing(Session::getId));
+        return sessions;
     }
 
     public Optional<Session> find(final String sessionId) {
