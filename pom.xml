@@ -106,7 +106,7 @@
         <version.jackson>2.8.2</version.jackson>
 
         <!-- App servers -->
-        <version.wildfly-swarm>2018.1.0</version.wildfly-swarm>
+        <version.wildfly-swarm>2018.2.0</version.wildfly-swarm>
         <version.payara>4.1.1.163</version.payara>
         <version.tomee>7.0.1</version.tomee>
         <version.wildfly>11.0.0.Final</version.wildfly>
@@ -128,6 +128,7 @@
 
     <modules>
         <module>demo-bootstrap</module>
+        <module>microservice-authz</module>
         <module>microservice-session</module>
         <module>microservice-vote</module>
         <module>microservice-speaker</module>
