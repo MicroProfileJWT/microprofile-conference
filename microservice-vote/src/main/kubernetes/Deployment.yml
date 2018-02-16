@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: microservice-vote
+    version: v1
+  name: microservice-vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservice-vote
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: microservice-vote
+        version: v1
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTIONS
+          value: -Xms64m -Xmx128m -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8080 -Djava.security.egd=file:///dev/./urandom
+        image: example/microservice-vote:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:8080/health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 1
+        name: microservice-vote
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:8080/health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 1
+        securityContext:
+          privileged: false

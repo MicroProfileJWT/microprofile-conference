@@ -1,0 +1,16 @@
+# A project defaults for use with MP-JWT auth-method that include additional role mapping
+swarm:
+  naming:
+    bindings:
+      java:/cloudant/url:
+        binding-type: simple
+        type: java.lang.String
+        value: http://127.0.0.1:5984
+      java:/cloudant/username:
+        binding-type: simple
+        type: java.lang.String
+        value: admin
+      java:/cloudant/password:
+        binding-type: simple
+        type: java.lang.String
+        value: admin

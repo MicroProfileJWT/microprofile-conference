@@ -19,7 +19,7 @@ package io.microprofile.showcase.vote.api;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath("/")
+@ApplicationPath("/vote")
 public class VoteApplication extends Application {
 
 }
