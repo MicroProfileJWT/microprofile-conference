@@ -14,6 +14,7 @@
 package io.microprofile.showcase.tokens;
 
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -30,6 +31,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -40,6 +44,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
@@ -47,8 +52,19 @@ import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 /**
  * Utiltities for generating a JWT for testing
  */
+@ApplicationScoped
 public class TokenUtils {
+    private static PrivateKey signingKey;
+
     private TokenUtils() {
+    }
+
+    public static PrivateKey getSigningKey() {
+        return signingKey;
+    }
+
+    public static void setSigningKey(PrivateKey signingKey) {
+        TokenUtils.signingKey = signingKey;
     }
 
     /**
@@ -74,6 +90,9 @@ public class TokenUtils {
      */
     public static String generateTokenString(String jsonResName, Map<String, Object> claims) throws Exception {
         InputStream contentIS = TokenUtils.class.getResourceAsStream(jsonResName);
+        if(contentIS == null) {
+            throw new FileNotFoundException("Failed to find resource: "+jsonResName);
+        }
         byte[] tmp = new byte[4096];
         int length = contentIS.read(tmp);
         byte[] content = new byte[length];
@@ -111,10 +130,12 @@ public class TokenUtils {
         }
 
         // Use the test private key associated with the test public key for a valid signature
-        PrivateKey pk = readPrivateKey("/privateKey.pem");
+        if(signingKey == null) {
+            signingKey = readPrivateKey("/privateKey.pem");
+        }
 
         // Create RSA-signer with the private key
-        JWSSigner signer = new RSASSASigner(pk);
+        JWSSigner signer = new RSASSASigner(signingKey);
         JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwtContent);
         JWSAlgorithm alg = JWSAlgorithm.RS256;
         JWSHeader jwtHeader = new JWSHeader.Builder(alg)

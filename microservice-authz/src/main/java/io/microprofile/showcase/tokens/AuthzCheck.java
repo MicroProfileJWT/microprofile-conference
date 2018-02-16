@@ -13,6 +13,7 @@
  */
 package io.microprofile.showcase.tokens;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -20,17 +21,32 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 
 /**
- * The health check for the session application
+ * The health check for the authz service
  */
 @Health
 @ApplicationScoped
 public class AuthzCheck implements HealthCheck {
+    @ConfigProperty(defaultValue = "true")
+    @Inject
+    private boolean includeTokenCounts;
+    @Inject
+    private TokenStorage storage;
+
+    @PostConstruct
+    private void init() {
+        System.out.printf("AuthzCheck.init, includeTokenCounts=%s, storage=%s\n", includeTokenCounts, storage);
+    }
+
     @Override
     public HealthCheckResponse call() {
-        return HealthCheckResponse.named("authz-check")
-            .up()
-            .build();
+        HealthCheckResponseBuilder builder = HealthCheckResponse.named("authz-check")
+            .up();
+        if(includeTokenCounts) {
+            builder = builder.withData("tokenCounts", storage.size());
+        }
+        return builder.build();
     }
 }
