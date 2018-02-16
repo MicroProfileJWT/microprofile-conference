@@ -879,7 +879,8 @@
         "code": "BA5917B2-B2C5-F343-60F3-ECD67F7F6AD7",
         "title": "Aliquam nisl.",
         "type": "Customer Service",
-        "speaker": 22
+        "speaker": 22,
+        "vipOnly": true
     },
     {
         "id": 64,
@@ -1229,7 +1230,8 @@
         "code": "A7858A80-383D-7635-C1C4-6F92DCBE6004",
         "title": "euismod in, dolor. Fusce feugiat.",
         "type": "Legal Department",
-        "speaker": 32
+        "speaker": 32,
+        "vipOnly": true
     },
     {
         "id": 89,
@@ -1243,7 +1245,8 @@
         "code": "0260051D-DE70-BAC8-5D8E-2AB9CA679E31",
         "title": "tellus, imperdiet non, vestibulum",
         "type": "Customer Relations",
-        "speaker": 68
+        "speaker": 68,
+        "vipOnly": true
     },
     {
         "id": 90,
