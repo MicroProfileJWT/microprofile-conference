@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: microservice-speaker
+    version: v1
+  name: microservice-speaker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservice-speaker
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: microservice-speaker
+        version: v1
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTIONS
+          value: -Xms64m -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.security.egd=file:///dev/./urandom
+        image: example/microservice-speaker:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:4040/health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 1
+        name: microservice-speaker
+        ports:
+        - containerPort: 4040
+          name: http
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - localhost:4040/health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 1
+        securityContext:
+          privileged: false
