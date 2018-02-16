@@ -50,6 +50,7 @@ export class SessionsComponent implements OnInit, OnChanges {
     }
 
     onSelect(session: Session): void {
+        console.log("onSelect(session: %s)", session);
         this.selectedSession = session;
     }
 
@@ -74,7 +75,7 @@ export class SessionsComponent implements OnInit, OnChanges {
     refresh() {
         console.log("refreshing sessions...");
         this.sessions = null;
-        getSessions();
+        this.getSessions();
     }
 
     private static handleError(error: any): Promise<any> {

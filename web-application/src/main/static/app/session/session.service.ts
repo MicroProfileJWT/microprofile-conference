@@ -20,7 +20,10 @@ export class SessionService {
         if (undefined != this.endPoint) {
             callback();
         } else {
-            this.endpointsService.getEndpoint("session").then(endPoint => this.setEndpoint(endPoint)).then(callback).catch(this.handleError);
+            this.endpointsService.getEndpoint("session")
+                .then(endPoint => this.setEndpoint(endPoint))
+                .then(callback)
+                .catch(this.handleError);
         }
     }
 
@@ -42,9 +45,24 @@ export class SessionService {
             .catch(this.handleError);
     }
 
+    retrieveRawSession(id: string): Promise<string> {
+        var url = this.endPoint.url + "/" + id;
+        console.log("Loading session info from: "+url);
+        var result: Promise<string> = this.jwtService.getWithJwt(url)
+            .then(response => {
+                var result = response.json() as string;
+                return result;
+            })
+            .catch(this.handleError);
+        return result;
+    }
+
     private setSessions(any: any): Session[] {
         this.sessions = any as Session[];
         console.log("Loaded %d sessions", this.sessions.length);
+        for(var n = 0; n < this.sessions.length; n ++) {
+            console.log(this.sessions[n]);
+        }
         return this.sessions;
     }
 

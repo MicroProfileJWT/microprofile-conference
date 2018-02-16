@@ -34,6 +34,16 @@
                 <div class="row p-a-1">
                     <div class="col-xs">Schedule: {{session.schedule}}</div>
                 </div>
+                <div class="row p-a-1">
+                    <button (click)="showRawInfo = !showRawInfo" class="btn btn-primary">RawInfo</button>
+                    <app-dialog [(visible)]="showRawInfo">
+                        <h1>Session Raw Info</h1>
+                        <pre>
+                    {{rawInfo | json}}
+                </pre>
+                        <button (click)="showRawInfo = !showRawInfo" class="btn">Dismiss</button>
+                    </app-dialog>
+                </div>
             </div>
         </div>
 
