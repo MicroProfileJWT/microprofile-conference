@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# A script that configures and starts a minishift environment for the MP1.2 demo
 minishift profile set mp12-demo
 minishift config set memory 4GB
 minishift config set cpus 3
