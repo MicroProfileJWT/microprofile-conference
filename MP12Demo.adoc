@@ -3,8 +3,10 @@
 
 == Prerequisites
 . Install the https://docs.openshift.org/latest/minishift/getting-started/installing.html[Minishift binary]
-. Install https://www.virtualbox.org/wiki/Downloads[VirtualBox]
-. Start minishift using the config-minishift.sh script
+. Install https://www.virtualbox.org/wiki/Downloads[VirtualBox] if needed
+. Clone the https://github.com/MicroProfileJWT/microprofile-conference.git project
+. cd microprofile-conference
+. Start minishift using the config-minishift.sh script in the microprofile-conference root directory
 . Configure your environment:
 [source,bash]
 ----
@@ -27,7 +29,7 @@ You have access to the following projects and can switch between them with 'oc p
 
 Using project "myproject".
 ----
-[start=5]
+[start=7]
 . open the minishift console uisng `minishift console`
 
 == Build and Deploy the Microservices
@@ -103,11 +105,27 @@ View details with 'oc describe <resource>/<name>' or list everything with 'oc ge
 [starksm64-microprofile-conference 1573]$
 ----
 [start=3]
+. Update the web-application/src/main/local/webapp/WEB-INF/conference.properties
+service URLs to use the value for `minishift ip` in your environment. In my environment
+192.168.99.100 is the IP address. Globally replace 192.168.99.100 with whatever is returned
+in your minishift setup.
+
 . Run the web application front end
 [source,bash]
 ----
 mvn package tomee:run -pl :web-application -DskipTests
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Conference :: Web 1.0.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+...
+miTargets] to [true] as the property does not exist.
+INFO - Starting ProtocolHandler [http-nio-8080]
+INFO - Starting ProtocolHandler [ajp-nio-8009]
+INFO - Server startup in 3177 ms
 ----
-[start=4]
+[start=5]
 . Open the web application http://localhost:8080/
 
