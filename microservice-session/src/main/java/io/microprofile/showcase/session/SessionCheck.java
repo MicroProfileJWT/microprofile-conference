@@ -11,7 +11,8 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 
 /**
- * Illustration of new MP-1.2 health check for the session application
+ * Illustration of new MP-1.2 health check for the session application with configuration
+ * used to externalize the session count data label
  */
 @Health
 @ApplicationScoped
