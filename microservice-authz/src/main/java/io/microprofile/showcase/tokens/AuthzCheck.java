@@ -32,6 +32,9 @@ public class AuthzCheck implements HealthCheck {
     @ConfigProperty(defaultValue = "true")
     @Inject
     private boolean includeTokenCounts;
+    @ConfigProperty(name = "JAR_SHA256")
+    @Inject
+    private String jarSha256;
     @Inject
     private TokenStorage storage;
 
@@ -44,9 +47,13 @@ public class AuthzCheck implements HealthCheck {
     public HealthCheckResponse call() {
         HealthCheckResponseBuilder builder = HealthCheckResponse.named("authz-check")
             .up();
+        // Include token counts if requested
         if(includeTokenCounts) {
             builder = builder.withData("tokenCounts", storage.size());
         }
+        // Include the JAR_SHA256 env value in the health check
+        builder = builder.withData("jarSHA256", jarSha256);
+
         return builder.build();
     }
 }
