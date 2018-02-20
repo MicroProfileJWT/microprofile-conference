@@ -11,7 +11,8 @@
         "code": "9386D971-8C4A-865B-233D-46557C4CD79A",
         "title": "in lobortis",
         "type": "Public Relations",
-        "speaker": 18
+        "speaker": 18,
+        "vipOnly": true
     },
     {
         "id": 2,
@@ -137,7 +138,8 @@
         "code": "ADDB01BA-5224-1E93-D684-805AEF19E37B",
         "title": "scelerisque",
         "type": "Research and Development",
-        "speaker": 63
+        "speaker": 63,
+        "vipOnly": true
     },
     {
         "id": 11,
@@ -1400,7 +1402,8 @@
         "code": "6E168E19-4B92-ECD8-01C6-6B4FC55C68FE",
         "title": "et tristique pellentesque, tellus",
         "type": "Human Resources",
-        "speaker": 55
+        "speaker": 55,
+        "vipOnly": true
     },
     {
         "id": 101,
