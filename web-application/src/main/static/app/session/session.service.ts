@@ -28,13 +28,17 @@ export class SessionService {
     }
 
     setEndpoint(endPoint: Endpoint): void {
+        console.log("SessionService.setEndpoint: %s", endPoint);
         this.endPoint = endPoint;
     }
 
+    clear(): void {
+        console.log("Refreshing sessions...");
+        this.sessions = undefined;
+    }
     getSessions(): Promise<Session[]> {
-
         const hasSessions = (undefined != this.sessions);
-        console.log("getSessions, hasSessions: "+hasSessions);
+        console.log("getSessions, hasSessions: %s, %s", hasSessions, this.sessions);
         if (hasSessions) {
             return Promise.resolve(this.sessions);
         }
@@ -50,14 +54,15 @@ export class SessionService {
         console.log("Loading session info from: "+url);
         var result: Promise<string> = this.jwtService.getWithJwt(url)
             .then(response => {
-                var result = response.json() as string;
-                return result;
+                var rawSession = response.json() as string;
+                return rawSession;
             })
             .catch(this.handleError);
         return result;
     }
 
     private setSessions(any: any): Session[] {
+        console.log("setSessions called, any="+any);
         this.sessions = any as Session[];
         console.log("Loaded %d sessions", this.sessions.length);
         for(var n = 0; n < this.sessions.length; n ++) {

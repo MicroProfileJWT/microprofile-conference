@@ -44,7 +44,7 @@
                     *ngFor="let session of (sessions | sessionFilter: search | sessionFilterSpeaker: speaker)"
                     [class.selected]="session === selectedSession"
                     (click)="onSelect(session)">
-                    {{session.title}}
+                    {{session.title}}<span *ngIf="session.viponly" style="vertical-align: super">VIP</span>
                 </li>
             </ul>
         </div>

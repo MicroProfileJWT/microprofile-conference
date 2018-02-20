@@ -47,6 +47,7 @@ export class AuthService {
             .map((response: Response) => {
                     let data = response.json();
                     if (data && data.hasOwnProperty("id_token")) {
+                        console.log("Saved token to local storage, %s", data.id_token);
                         localStorage.setItem(AuthService.ACCESS_TOKEN, data.id_token);
                     }
                 }

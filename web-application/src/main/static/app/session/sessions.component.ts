@@ -27,7 +27,12 @@ export class SessionsComponent implements OnInit, OnChanges {
 
     getSessions(): void {
         console.log("SessionsComponent.getSessions");
-        this.sessionService.getSessions().then(sessions => this.sessions = sessions).catch(SessionsComponent.handleError);
+        this.sessionService.getSessions()
+            .then(sessions => {
+                this.sessions = sessions;
+                this.title = "Sessions["+sessions.length+"]";
+            })
+            .catch(SessionsComponent.handleError);
     }
 
     ngOnInit(): void {
@@ -68,6 +73,7 @@ export class SessionsComponent implements OnInit, OnChanges {
 
     logout(): void {
         this.auth.logout();
+        this.sessionService.clear();
         console.log("logged out, navigating back to /");
         this.router.navigateByUrl("/login");
     }
@@ -75,6 +81,7 @@ export class SessionsComponent implements OnInit, OnChanges {
     refresh() {
         console.log("refreshing sessions...");
         this.sessions = null;
+        this.sessionService.clear();
         this.getSessions();
     }
 

@@ -64,12 +64,9 @@ export class JwtService {
         // Record what service was requested so that we can re-navigate back to that service when we return
         this.storeRequestedService();
         console.log("Requesting token...");
-
-        //window.alert("Requesting JWT");
+        window.alert("Should not get here currently!");
         // Hard coded test
-        const token = 'eyJraWQiOiJcL3ByaXZhdGVLZXkucGVtIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIyNDQwMDMyMCIsImF1ZCI6WyJ2b3RlIiwic2Vzc2lvbnMiLCJzY2hlZHVsZSJdLCJ1cG4iOiJ1c2VyMUBleGFtcGxlLmNvbSIsImF1dGhfdGltZSI6MTUwNjY5ODk5OCwiaXNzIjoiaHR0cHM6XC9cL21wY29uZmVyZW5jZS5jb20iLCJncm91cHMiOlsiVm90ZXIiLCJSZWdpc3RlcmVkIiwiVklQIl0sInByZWZlcnJlZF91c2VybmFtZSI6InVzZXIxIiwiZXhwIjoxNTA5MjkwOTk4LCJpYXQiOjE1MDY2OTg5OTgsImp0aSI6ImEtMTIzIn0.ZQdHltg_acXcEA9XjsRNLLgdV0X_H4BE2YmZTdlQpZsjfV6MiFHdgMz3aQPRGE_6uMpB-1mZ_HFcyoMyvYjQLfGnIJx8mCEeuaZ-n8KFUeLmHPqLeOJz243wKFRCtdNyWHenI30-PIJyHoHN9DnJkpWyHBILRKzQ3IIoB6Lw20lTNgjDgP3AU7uDdHUgADmNkRORFKTT95ZY31TVKBZrGaK6HWT9J7KCrRovxzEjwNq1BGMgwuFotoAThESrwu05MKJM3Q_0_0pY1H6osaOis4k7Va9qkkhqOsF-_s92BxaFdURB76uc7-cHxo7nw_-hLlCmrkcmdUsFzLSkzwNVGw';
-        this.setInStorage(AuthService.ACCESS_TOKEN, token);
-        return Promise.resolve(token);
+        return Promise.resolve("invalid");
 /* TODO: enable this flow
         // Set all parameters required or recommended by OAuth implicit flow
         const redirectUri = this.getRedirectUri();
