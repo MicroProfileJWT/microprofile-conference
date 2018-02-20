@@ -22,12 +22,16 @@ public class SessionCheck implements HealthCheck {
     @Inject
     @ConfigProperty(name = "sessionCountName", defaultValue = "sessionCount")
     private String sessionCountName;
+    @ConfigProperty(name = "JAR_SHA256")
+    @Inject
+    private String jarSha256;
 
     @Override
     public HealthCheckResponse call() {
         return HealthCheckResponse.named("sessions-check")
             .withData(sessionCountName, sessionStore.getSessions().size())
             .withData("lastCheckDate", new Date().toString())
+            .withData("jarSHA256", jarSha256)
             .up()
             .build();
     }

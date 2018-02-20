@@ -72,6 +72,11 @@ public class SessionResource {
     @Inject
     private SessionStore sessionStore;
 
+    /**
+     * The current MP-JWT for the authenticated user
+     */
+    @Inject JsonWebToken jwt;
+
     @PostConstruct
     void init() {
         Collection<Session> sessions = sessionStore.getSessions();
@@ -88,21 +93,19 @@ public class SessionResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    // Accumlate all method time in a SessionResource.methodTime timer metric
     @Timed
     public Collection<Session> allSessions(@Context SecurityContext securityContext) throws Exception {
         requestCount.inc();
-        // Access the authenticated user as a JsonWebToken
-        JsonWebToken jwt = (JsonWebToken) securityContext.getUserPrincipal();
         if (jwt == null) {
             // User was not authenticated
             System.out.printf("allSessions, no token\n");
             return Collections.emptyList();
         }
         String userName = jwt.getName();
+        // Use the isUserInRole of container to check for VIP role in the JWT groups claim
         boolean isVIP = securityContext.isUserInRole("VIP");
         System.out.printf("allSessions(%s), isVIP=%s, User token: %s\n", userName, isVIP, jwt);
-        // Check if the user has a session_time_preference in the token
+        // Check if the user has a session_time_preference custom claim in the token
         Optional<String> sessionTimePref = jwt.claim("session_time_preference");
         if(sessionTimePref.isPresent()) {
             // Create a session filter for the time preference...
@@ -111,7 +114,10 @@ public class SessionResource {
         // If the user does NOT have a VIP role, filter out the VIP sessions
         Collection<Session> sessions;
         if (!isVIP) {
-            sessions = sessionStore.getSessions().stream().filter(session -> !session.isVIPOnly()).collect(Collectors.toList());
+            sessions = sessionStore.getSessions()
+                .stream()
+                .filter(session -> !session.isVIPOnly())
+                .collect(Collectors.toList());
         } else {
             sessions = sessionStore.getSessions();
         }
@@ -128,7 +134,6 @@ public class SessionResource {
     @GET
     @Path("/{sessionId}")
     @Produces(MediaType.APPLICATION_JSON)
-    // Accumlate all method time in a SessionResource.methodTime timer metric
     @Timed
     public Response retrieveSession(@PathParam("sessionId") final String sessionId) throws Exception {
         requestCount.inc();
@@ -168,7 +173,6 @@ public class SessionResource {
     @GET
     @Path("/{sessionId}/speakers")
     @Produces(MediaType.APPLICATION_JSON)
-    // Accumlate all method time in a SessionResource.methodTime timer metric
     @Timed
     public Response sessionSpeakers(@PathParam("sessionId") final String sessionId) throws Exception {
         requestCount.inc();

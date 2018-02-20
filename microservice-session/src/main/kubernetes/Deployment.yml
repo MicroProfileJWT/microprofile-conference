@@ -21,6 +21,8 @@ spec:
       - env:
         - name: JAVA_OPTIONS
           value: -Xms64m -Xmx128m -Djava.net.preferIPv4Stack=true -Djava.security.egd=file:///dev/./urandom
+        - name: JAR_SHA256
+          value: JAR_SHA256_VALUE
         image: example/microservice-session:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
