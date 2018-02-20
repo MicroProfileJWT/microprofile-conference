@@ -10,3 +10,6 @@ minishift addon enable admin-user
 minishift config set openshift-version v3.7.1
 
 minishift start
+
+eval $(minishift oc-env)
+eval $(minishift docker-env)
