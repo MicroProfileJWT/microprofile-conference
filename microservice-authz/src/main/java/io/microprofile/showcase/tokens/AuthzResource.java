@@ -15,7 +15,6 @@ package io.microprofile.showcase.tokens;
 
 import java.security.PrivateKey;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.PermitAll;
