@@ -129,3 +129,276 @@ INFO - Server startup in 3177 ms
 [start=5]
 . Open the web application http://localhost:8080/
 
+== Code Walkthrough
+In this section we take a look at the code behind the Microprofile features in use in the
+conference application. 
+
+=== MP-JWT
+The https://github.com/eclipse/microprofile-jwt-auth[JWT RBAC for MicroProfile](MP-JWT) feature defines how JSON web tokens(JWT) may be used for authentication and
+role based authorization. The MP-JWT feature also defines an API for accessing the claims associated
+with JWTs. In the conference application demo, the microservice-session uses the JWT groups
+claim and a custom application claim. The following code snippet demonstrates the MP-JWT API.
+
+[NOTE]
+Code from: microservice-session/src/main/java/io/microprofile/showcase/session/SessionResource.java
+[source,java]
+-----
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
+
+@ApplicationScoped
+public class SessionResource {
+
+
+    /**
+     * The current MP-JWT for the authenticated user
+     */
+    @Inject
+    JsonWebToken jwt; <1>
+
+...
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed
+    public Collection<Session> allSessions(@Context SecurityContext securityContext) throws Exception {
+        requestCount.inc();
+        if (jwt == null) { <2>
+            // User was not authenticated
+            System.out.printf("allSessions, no token\n");
+            return Collections.emptyList();
+        }
+        String userName = jwt.getName();
+        // Use the isUserInRole of container to check for VIP role in the JWT groups claim
+        boolean isVIP = securityContext.isUserInRole("VIP"); <3>
+        System.out.printf("allSessions(%s), isVIP=%s, User token: %s\n", userName, isVIP, jwt);
+        // Check if the user has a session_time_preference custom claim in the token
+        Optional<String> sessionTimePref = jwt.claim("session_time_preference"); <4>
+        if(sessionTimePref.isPresent()) {
+            // Create a session filter for the time preference...
+        }
+
+        // If the user does NOT have a VIP role, filter out the VIP sessions
+        Collection<Session> sessions;
+        if (!isVIP) { <5>
+            sessions = sessionStore.getSessions()
+                .stream()
+                .filter(session -> !session.isVIPOnly())
+                .collect(Collectors.toList());
+        } else {
+            sessions = sessionStore.getSessions();
+        }
+        return sessions;
+    }
+-----
+<1> Injection of the MP-JWT token as a JsonWebToken interface.
+<2> If there is no token, return an empty collection of sessions
+<3> Check for a VIP role in the token using the container's isUserInRole(String) method. This
+internally maps to the token's MP-JWT defined group claims.
+<4> Illustrates programatic lookup of a custom claim not defined by the MP-JWT spec. In this
+example the session results would be filtered to only return those matching the session time
+of day preference.
+<5> This code block makes a check of the incoming MP-JWT token to see if it has a group claim
+that contains the VIP value. If the VIP claim does not exist, the sessions are filtered to
+remove those that the isVIPOnly property. Otherwise, all sessions are returned if the token
+has the VIP group.
+
+=== MP-Configuration
+The https://github.com/eclipse/microprofile-config[Microprofile config](MP-Config) supports injection and programtic lookup of external configuration information via a common API. The MP-Config spec defines 3 common configuration sources:
+* System environment variables
+* System properties
+* A META-INF/microprofile-config.properties
+
+SPIs are defined for adding configuration sources as well as for converting from string to arbitrary types. 
+
+The microprofile conference app makes use of injection of META-INF/microprofile-config.properties, environment variables, and the conversion SPI. The first code snippet we will look at injects a value from the bundled META-INF/microprofile-config.properties as a `java.security.PrivateKey`. The `AuthzResource` from the microservice-authz project shows the injection:
+
+[NOTE]
+Code from: microservice-authz/src/main/java/io/microprofile/showcase/tokens/AuthzResource.java,PrivateKeyConverter.java
+[source,java]
+-----
+import java.security.PrivateKey;
+
+@ApplicationScoped
+public class AuthzResource {
+
+/**
+ * An example of injecting a custom property type
+ */
+@ConfigProperty(name="authz.signingKey") <1>
+@Inject
+private PrivateKey signingKey; <2>
+
+...
+-----
+
+[source]
+-----
+# The META-INF/microprofile-config.properties entries
+authz.signingKey=/privateKey.pem <3>
+-----
+
+[source,java]
+-----
+import java.security.PrivateKey;
+
+import org.eclipse.microprofile.config.spi.Converter;
+
+import static io.microprofile.showcase.tokens.TokenUtils.readPrivateKey;
+
+/**
+ * A custom configuration converter for {@linkplain PrivateKey} injection using
+ * {@linkplain org.eclipse.microprofile.config.inject.ConfigProperty}
+ */
+public class PrivateKeyConverter implements Converter<PrivateKey> { <4>
+    /**
+     * Converts a string to a PrivateKey by loading it as a classpath resource
+     * @param s - the string value to convert
+     * @return the PrivateKey loaded as a resource
+     * @throws IllegalArgumentException - on failure to load the key
+     */
+    @Override
+    public PrivateKey convert(String s) throws IllegalArgumentException {
+
+        PrivateKey pk = null;
+        try {
+            pk = readPrivateKey(s);
+        } catch (Exception e) {
+            IllegalArgumentException ex = new IllegalArgumentException("Failed to parse ");
+            ex.initCause(e);
+            throw ex;
+        }
+        return pk;
+    }
+}
+-----
+<1> The config property name reference to match against a config source.
+<2> The custom value PrivateKey value injection site.
+<3> The mapping from the referenced "authz.signingKey" name to a string value in the standard META-INF/microprofile-config.properties.
+<4> The custom converter implementation that takes the input string value and transforms it into a PrivateKey by loading it as a resource from the classpath.
+
+A further example usage of the MP-Config will be seen in the next section on the health check feature.
+
+=== MP-Health
+The https://github.com/eclipse/microprofile-health[Microprofile health check](MP-Health) feature allows on to define application health check endpoints
+as commonly used in cloud environment to validate avaiability and liveness. The MP-Health feature supports this along with an ability to define a JSON payload that can be used to convey additional information.
+
+The following microservice-session MP-Health code snippet shows an example health implementation that makes use of the MP-Config API to inject configuration that is used during construction the health response.
+
+[NOTE]
+Code from: microservice-session/src/main/java/io/microprofile/showcase/session/SessionCheck.java
+
+[source,java]
+-----
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.health.Health;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+
+@Health <1>
+@ApplicationScoped
+public class SessionCheck implements HealthCheck { <2>
+    @Inject
+    private SessionStore sessionStore;
+    @Inject
+    @ConfigProperty(name = "sessionCountName", defaultValue = "sessionCount") <3>
+    private String sessionCountName;
+    @ConfigProperty(name = "JAR_SHA256") <4>
+    @Inject
+    private String jarSha256;
+
+    @Override
+    public HealthCheckResponse call() { <5>
+        return HealthCheckResponse.named("sessions-check")
+            .withData(sessionCountName, sessionStore.getSessions().size()) <6>
+            .withData("lastCheckDate", new Date().toString())
+            .withData("jarSHA256", jarSha256)
+            .up()
+            .build();
+    }
+}
+-----
+<1> The annotation marking the bean as a health check endpoint.
+<2> The `HealthCheck` interface the endpoint implements to provide the health callback.
+<3> An example of externalizing a data label used in health check response whose value is
+defined in the application META-INF/microprofile-config.properties.
+<4> An example of injection of a config value whose source is an environment variable that is defined in the microservice-session openshift deployment descriptor.
+<5> The `HealthCheck` call endpoint that returns the `HealthCheckResponse`.
+<6> The various withData calls add labelled values, including the injected config values, to the JSON payload.
+
+=== MP-Metrics
+The https://github.com/eclipse/microprofile-metrics[Microprofile metrics](MP-Metrics) feature aims to provide a unified way for Microprofile services to export Monitoring data via common API.
+
+[NOTE]
+Code from: microservice-session/src/main/java/io/microprofile/showcase/session/SessionResource.java
+[source,java]
+-----
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.Histogram;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.annotation.Metric;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+
+@ApplicationScoped
+public class SessionResource {
+
+    @Inject
+    @Metric(name = "requestCount", description = "All JAX-RS request made to the SessionResource",
+        displayName = "SessionResource#requestCount") <1>
+    private Counter requestCount;
+
+    /**
+     * The application metrics registry that allows access to any metric to be accessed/created
+     */
+    @Inject
+    private MetricRegistry metrics; <2>
+
+    @PostConstruct
+    void init() {
+        Collection<Session> sessions = sessionStore.getSessions();
+        System.out.printf("SessionResource.init, session count=%d\n", sessions.size());
+        // Create a histogram of the session abstract word counts
+        Metadata metadata = new Metadata(SessionResource.class.getName()+".abstractWordCount", MetricType.HISTOGRAM);<3>
+        metadata.setDescription("Word count histogram for the session abstracts");
+        Histogram abstractWordCount = metrics.histogram(metadata);<4>
+        for(Session session : sessions) {
+            String[] words = session.getAbstract().split("\\s+");
+            abstractWordCount.update(words.length);<5>
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed<6>
+    public Collection<Session> allSessions(@Context SecurityContext securityContext) throws Exception {
+        requestCount.inc();<7>
+...
+    }
+
+    @GET
+    @Path("/{sessionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed<6>
+    public Response retrieveSession(@PathParam("sessionId") final String sessionId) throws Exception {
+        requestCount.inc();<7>
+        ...
+    }
+
+
+    @GET
+    @Path("/{sessionId}/speakers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed<6>
+    public Response sessionSpeakers(@PathParam("sessionId") final String sessionId) throws Exception {
+...
+    }
+-----
+<1> Define a `Counter` type metric named requestCount.
+<2> Injection of the `MetricRegistry` interface allows for programmatic creation and lookup of metrics as will be done in init().
+<3> Sets up the metadata for an abstractWordCount metric of type Histogram.
+<4> The actual creation of the Histogram metric via the injected MetricRegistry instance.
+<5> Population of the abstractWordCount from the various session abstracts.
+<6> The allSessions, retrieveSession and sessionSpeakers endpoint methods are annotated with @Timed to indicate that the MP-Metrics layer should intercept the method invocations and create statistics for them.
+<7> Programmatic updates of the injected requestCount metric are seen in the allSessions and retrieveSession endpoint methods.
