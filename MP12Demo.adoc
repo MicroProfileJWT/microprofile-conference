@@ -3,6 +3,7 @@
 
 == Prerequisites
 . Install the https://docs.openshift.org/latest/minishift/getting-started/installing.html[Minishift binary]
+. Install https://docs.docker.com/install/[Docker] if needed
 . Install https://www.virtualbox.org/wiki/Downloads[VirtualBox] if needed
 . Clone the https://github.com/MicroProfileJWT/microprofile-conference.git project
 . cd microprofile-conference
@@ -29,7 +30,7 @@ You have access to the following projects and can switch between them with 'oc p
 
 Using project "myproject".
 ----
-[start=7]
+[start=8]
 . open the minishift console uisng `minishift console`
 
 == Build and Deploy the Microservices
