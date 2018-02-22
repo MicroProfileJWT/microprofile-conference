@@ -27,3 +27,4 @@ nb-configuration.xml
 ui.bat
 .distribution
 .microprofile
+*.pdf
